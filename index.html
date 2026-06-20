@@ -29,7 +29,9 @@ body{background:#050508;color:var(--text);font-family:'Inter',sans-serif;font-we
 .stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
 .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) infinite var(--delay,0s)}
 @keyframes twinkle{0%,100%{opacity:var(--min-op,0.1)}50%{opacity:var(--max-op,0.6)}}
-#binaryCanvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.15}
+#binaryCanvas{display:none}
+.binary-col{position:fixed;top:-100%;font-family:monospace;font-size:13px;line-height:1.4;pointer-events:none;z-index:0;animation:bfall linear infinite;white-space:pre;letter-spacing:2px}
+@keyframes bfall{0%{transform:translateY(-100%)}100%{transform:translateY(200vh)}}
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(5,5,8,0.7);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
@@ -314,50 +316,26 @@ footer{position:relative;z-index:1;padding:40px;display:flex;align-items:center;
 </footer>
 
 <script>
-// BINARY RAIN
+// BINARY RAIN - CSS version for iOS Safari
 window.addEventListener('load', function(){
-  const canvas=document.getElementById('binaryCanvas');
-  if(!canvas)return;
-  const ctx=canvas.getContext('2d');
-  const fontSize=14;
-  let W,H,cols,drops,colColors;
-
-  function init(){
-    W=canvas.width=window.innerWidth;
-    H=canvas.height=window.innerHeight;
-    cols=Math.floor(W/fontSize);
-    drops=[];
-    colColors=[];
-    for(let i=0;i<cols;i++){
-      drops[i]=-(Math.random()*(H/fontSize));
-      colColors[i]=Math.random()<0.7?'124,58,237':'240,192,96';
-    }
+  const body=document.body;
+  const cols=Math.floor(window.innerWidth/18);
+  const chars='01';
+  for(let i=0;i<cols;i++){
+    const col=document.createElement('div');
+    col.className='binary-col';
+    const isViolet=Math.random()<0.7;
+    col.style.left=(i*18)+'px';
+    col.style.color=isViolet?'rgba(124,58,237,0.6)':'rgba(240,192,96,0.5)';
+    col.style.animationDuration=(6+Math.random()*10)+'s';
+    col.style.animationDelay=(-Math.random()*10)+'s';
+    col.style.opacity=0.3+Math.random()*0.4;
+    let txt='';
+    const len=20+Math.floor(Math.random()*30);
+    for(let j=0;j<len;j++) txt+=chars[Math.floor(Math.random()*2)]+'\n';
+    col.textContent=txt;
+    body.appendChild(col);
   }
-  init();
-  window.addEventListener('resize',init);
-
-  let last=0;
-  function draw(ts){
-    requestAnimationFrame(draw);
-    if(ts-last<40)return;
-    last=ts;
-    ctx.fillStyle='rgba(5,5,8,0.07)';
-    ctx.fillRect(0,0,W,H);
-    ctx.font=fontSize+'px monospace';
-    for(let i=0;i<cols;i++){
-      const ch=Math.random()<0.5?'0':'1';
-      const y=drops[i]*fontSize;
-      const op=0.4+Math.random()*0.6;
-      ctx.fillStyle=`rgba(${colColors[i]},${op})`;
-      ctx.fillText(ch,i*fontSize,y);
-      if(y>H&&Math.random()>0.97){
-        drops[i]=0;
-        colColors[i]=Math.random()<0.7?'124,58,237':'240,192,96';
-      }
-      drops[i]+=0.6;
-    }
-  }
-  requestAnimationFrame(draw);
 });
 
 
