@@ -315,48 +315,50 @@ footer{position:relative;z-index:1;padding:40px;display:flex;align-items:center;
 
 <script>
 // BINARY RAIN
-(function(){
+window.addEventListener('load', function(){
   const canvas=document.getElementById('binaryCanvas');
+  if(!canvas)return;
   const ctx=canvas.getContext('2d');
-  let cols,drops,W,H;
-  const chars='01';
-  const fontSize=13;
+  const fontSize=14;
+  let W,H,cols,drops,colColors;
 
-  function resize(){
+  function init(){
     W=canvas.width=window.innerWidth;
     H=canvas.height=window.innerHeight;
     cols=Math.floor(W/fontSize);
-    drops=Array(cols).fill(0).map(()=>-Math.random()*80);
-  }
-  resize();
-  window.addEventListener('resize',resize);
-
-  // Each column gets a random color: violet or gold
-  const colColors=[];
-  function assignColors(){
+    drops=[];
+    colColors=[];
     for(let i=0;i<cols;i++){
-      colColors[i]=Math.random()<0.7?'rgba(124,58,237,VAL)':'rgba(240,192,96,VAL)';
+      drops[i]=-(Math.random()*(H/fontSize));
+      colColors[i]=Math.random()<0.7?'124,58,237':'240,192,96';
     }
   }
-  assignColors();
+  init();
+  window.addEventListener('resize',init);
 
-  function draw(){
-    ctx.fillStyle='rgba(5,5,8,0.05)';
+  let last=0;
+  function draw(ts){
+    requestAnimationFrame(draw);
+    if(ts-last<40)return;
+    last=ts;
+    ctx.fillStyle='rgba(5,5,8,0.07)';
     ctx.fillRect(0,0,W,H);
     ctx.font=fontSize+'px monospace';
     for(let i=0;i<cols;i++){
-      const ch=chars[Math.floor(Math.random()*chars.length)];
+      const ch=Math.random()<0.5?'0':'1';
       const y=drops[i]*fontSize;
-      // Head brighter
-      const op=0.6+Math.random()*0.4;
-      ctx.fillStyle=colColors[i].replace('VAL',op);
+      const op=0.4+Math.random()*0.6;
+      ctx.fillStyle=`rgba(${colColors[i]},${op})`;
       ctx.fillText(ch,i*fontSize,y);
-      if(y>H&&Math.random()>0.975){drops[i]=0;colColors[i]=Math.random()<0.7?'rgba(124,58,237,VAL)':'rgba(240,192,96,VAL)';}
-      drops[i]+=0.4+Math.random()*0.3;
+      if(y>H&&Math.random()>0.97){
+        drops[i]=0;
+        colColors[i]=Math.random()<0.7?'124,58,237':'240,192,96';
+      }
+      drops[i]+=0.6;
     }
   }
-  setInterval(draw,50);
-})();
+  requestAnimationFrame(draw);
+});
 
 
 (function(){
